@@ -1,0 +1,51 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+db.sqlite3
+
+# If you use Django's local settings file
+local_settings.py
+
+# Ignore environment variables
+.env
+.env.*
+
+# Media and static (optional, if generated and not versioned)
+media/
+staticfiles/
+static/
+
+# Django migration files (optional)
+**/migrations/*.pyc
+**/migrations/__pycache__/
+# Uncomment the next line only if you want to ignore migration files
+# **/migrations/*.py
+
+# Virtual environments
+env/
+venv/
+ENV/
+.venv/
+.ENV/
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
