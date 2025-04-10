@@ -4,7 +4,6 @@ from django.contrib import messages
 from .models import Course, Enrollment
 from django.contrib.auth import get_user_model 
 from .forms import CourseForm, CustomUserCreationForm
-# from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Course, Enrollment
@@ -25,7 +24,11 @@ class RegisterView(generic.CreateView):
     success_url = reverse_lazy('login')
     template_name = 'registration/register.html'
 
-
+#Student progress view
+@login_required
+def progress(request):
+    enrollments = Enrollment.objects.filter(student=request.user)
+    return render(request, 'dashboard/progress/student.html', {'enrollments': enrollments})
 
 #enrollment
 @login_required
@@ -39,6 +42,31 @@ def enroll_course(request, course_id):
         messages.info(request, f"You are already enrolled in {course.title}")
     
     return redirect('home')
+
+#course-details
+@login_required
+def course_details(request, course_id):
+    courses = get_object_or_404(Course, id=course_id)
+    return render(request, 'dashboard/course_detail.html', {'courses':courses}) 
+
+#update progress
+@login_required
+def update_progress(request, enrollment_id):
+    enrollment = get_object_or_404(Enrollment, id=enrollment_id, student=request.user)
+    
+    if request.method == 'POST':
+            progress = int(request.POST.get('progress', 0))
+            progress = max(0, min(100, progress)) 
+            enrollment.progress = progress
+            
+            if progress == 100:
+                enrollment.completed = True
+            else:
+                enrollment.completed = False
+                
+            enrollment.save()
+            
+    return redirect('student-progress')
 
 
 
@@ -95,3 +123,32 @@ def delete_course(request, course_id):
 
     
 
+#progress admin view
+User = get_user_model()
+@login_required
+@user_passes_test(is_admin)
+
+def admin_progress(request):
+    course_id = request.GET.get('course')
+    students = User.objects.filter(is_staff=False).order_by('username')
+    courses = Course.objects.all()
+    
+    # Prepare context
+    context = {
+        'students': [],
+        'courses': courses,
+        'selected_course': int(course_id) if course_id else None,
+    }
+    
+    for student in students:
+        enrollments = Enrollment.objects.filter(student=student)
+        if course_id:
+            enrollments = enrollments.filter(course_id=course_id)
+        
+        if enrollments.exists():
+            context['students'].append({
+                'user': student,
+                'enrollments': enrollments.select_related('course')
+            })
+    
+    return render(request, 'dashboard/progress/admin.html', context)

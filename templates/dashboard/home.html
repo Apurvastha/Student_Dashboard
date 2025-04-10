@@ -1,8 +1,8 @@
-<!-- templates/dashboard/home.html -->
+
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Home - Student Dashboard{% endblock %}
+{% block title %}Home - {%if user.is_staff%}Admin {%else%} Student {%endif%} Dashboard{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
@@ -33,7 +33,7 @@
                             </div>
                         {% elif user.is_authenticated %}
                             <a href="{% url 'enroll_course' course.id %}" class="btn btn-sm btn-outline-success">Enroll</a>
-                            <a href="#" class="btn btn-sm btn-outline-primary">Details</a>
+                            <a href="{% url "course-details" course.id %}" class="btn btn-sm btn-outline-primary">Details</a>
                         {% else %}
                             <a href="{% url 'login' %}" class="btn btn-sm btn-outline-primary">Login to enroll</a>
                         {% endif %}

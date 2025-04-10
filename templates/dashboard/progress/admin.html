@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Enrollments - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Student Course Enrollments</h1>
+    
+    <!-- Course Filter -->
+    <div class="mb-4">
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                <select name="course" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Courses</option>
+                    {% for course in courses %}
+                        <option value="{{ course.id }}" 
+                            {% if selected_course == course.id %}selected{% endif %}>
+                            {{ course.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+
+    {% if students %}
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% for student_data in students %}
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        {{ student_data.user.get_full_name|default:student_data.user.username }}
+                        <span class="badge bg-light text-dark float-end">
+                            {{ student_data.enrollments|length }} course{{ student_data.enrollments|length|pluralize }}
+                        </span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for enrollment in student_data.enrollments %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <strong>{{ enrollment.course.title }}</strong>
+                                    <div class="text-muted small">
+                                        Enrolled: {{ enrollment.enrollment_date|date:"M d, Y" }}
+                                    </div>
+                                </div>
+                                <span class="badge {% if enrollment.completed %}bg-success{% else %}bg-primary{% endif %}">
+                                    {% if enrollment.completed %}Completed{% else %}Active{% endif %}
+                                </span>
+                            </div>
+                            <!-- Progress Bar -->
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar {% if enrollment.completed %}bg-success{% endif %}" 
+                                     role="progressbar" 
+                                     style="width: {{ enrollment.progress }}%" 
+                                     aria-valuenow="{{ enrollment.progress }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    {{ enrollment.progress }}%
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        No students found with enrollments.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

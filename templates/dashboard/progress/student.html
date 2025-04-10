@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}My Progress - Student Dashboard{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">My Course Progress</h1>
+
+{% if enrollments %}
+    <div class="row row-cols-1 g-4">
+        {% for enrollment in enrollments %}
+            <div class="col">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ enrollment.course.title }}</h5>
+                        <span class="badge {% if enrollment.completed %}bg-success{% else %}bg-primary{% endif %}">
+                            {% if enrollment.completed %}Completed{% else %}In Progress{% endif %}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <p>{{ enrollment.course.description }}</p>
+                        <p class="text-muted mb-2">Enrolled on: {{ enrollment.enrollment_date|date:"F j, Y" }}</p>
+                        
+                        <!-- Progress Bar -->
+                        <div class="mb-3">
+                            <label class="form-label">Course Progress: {{ enrollment.progress }}%</label>
+                            <div class="progress">
+                                <div class="progress-bar {% if enrollment.completed %}bg-success{% endif %}" 
+                                     role="progressbar" 
+                                     style="width: {{ enrollment.progress }}%" 
+                                     aria-valuenow="{{ enrollment.progress }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    {{ enrollment.progress }}%
+                                </div>
+                            </div>
+                        </div>
+                        
+                       
+                        <form method="post" action="{% url 'update-progress' enrollment.id %}" class="row g-3 align-items-center">
+                            {% csrf_token %}
+                            <div class="col-sm-8">
+                                <div class="input-group">
+                                    <input type="number" name="progress" class="form-control" min="0" max="100" value="{{ enrollment.progress }}" required>
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <button type="submit" class="btn btn-primary w-100">Update Progress</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        You are not enrolled in any courses yet. <a href="{% url 'home' %}">Browse available courses</a>.
+    </div>
+{% endif %}
+{% endblock %}
